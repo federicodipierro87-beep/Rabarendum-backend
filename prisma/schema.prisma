@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  name      String
+  role      Role     @default(JUROR)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  votes     Vote[]
+}
+
+model Participant {
+  id        Int      @id @default(autoincrement())
+  name      String
+  category  Category
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  votes     Vote[]
+
+  @@unique([name, category])
+}
+
+model Vote {
+  id            Int         @id @default(autoincrement())
+  score         Int
+  userId        Int
+  participantId Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, participantId])
+}
+
+enum Role {
+  ADMIN
+  JUROR
+}
+
+enum Category {
+  CARRI
+  GRUPPI
+  TENDINE
+  GUGGEN
+}
